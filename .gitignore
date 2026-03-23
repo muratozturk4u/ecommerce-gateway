@@ -1,0 +1,52 @@
+# Dependencies
+node_modules/
+
+# Build Output
+dist/
+build/
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+
+# Test Coverage
+coverage/
+.nyc_output/
+
+# AI Development Tools
+.claude/
+CLAUDE.md
+SCRATCHPAD.md
+
+# Internal Planning Documentation
+docs/transformation/
+docs/adr/
+docs/architecture/
+docs/INDEX.md
+docs/*.pdf
+
+# Reference Project
+another-project/
+
+# Misc
+*.tgz
+*.tar.gz
