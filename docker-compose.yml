@@ -9,6 +9,12 @@ services:
     environment:
       - PORT=3000
       - MONGODB_URI=mongodb://mongodb:27017
+      - INTERNAL_KEY=${INTERNAL_KEY:-default-internal-key}
+      - JWT_SECRET=${JWT_SECRET:-default-jwt-secret}
+      - JWT_EXPIRES_IN=${JWT_EXPIRES_IN:-24h}
+      - AUTH_SERVICE_URL=http://auth-service:3001
+      - PRODUCT_SERVICE_URL=http://product-service:3002
+      - ORDER_SERVICE_URL=http://order-service:3003
       - LOG_LEVEL=${LOG_LEVEL:-info}
       - NODE_ENV=${NODE_ENV:-development}
     networks:
