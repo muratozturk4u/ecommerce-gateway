@@ -48,5 +48,6 @@ docs/*.pdf
 another-project/
 
 # Misc
+*.zip
 *.tgz
 *.tar.gz

@@ -1,0 +1,15 @@
+node_modules
+dist
+coverage
+.git
+.gitignore
+.env
+.env.*
+*.md
+__tests__
+.claude
+docs
+another-project
+*.zip
+*.tgz
+*.tar.gz
