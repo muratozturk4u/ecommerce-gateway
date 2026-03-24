@@ -9,7 +9,6 @@ coverage
 __tests__
 .claude
 docs
-another-project
 *.zip
 *.tgz
 *.tar.gz
