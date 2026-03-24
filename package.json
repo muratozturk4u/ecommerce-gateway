@@ -1,0 +1,9 @@
+{
+  "name": "ecommerce-gateway",
+  "version": "0.1.0",
+  "private": true,
+  "description": "E-Commerce Gateway - Mikroservis mimarisi ile e-ticaret sistemi",
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}
