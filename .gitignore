@@ -44,9 +44,7 @@ docs/architecture/
 docs/INDEX.md
 docs/*.pdf
 
-# Reference Project
-another-project/
-
 # Misc
+*.zip
 *.tgz
 *.tar.gz
