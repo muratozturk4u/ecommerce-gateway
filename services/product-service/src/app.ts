@@ -3,6 +3,7 @@ import cors from 'cors';
 import { InternalAuthMiddleware } from './middleware/internal-auth.middleware';
 import { healthRouter } from './routes/health.routes';
 import { categoryRouter } from './routes/category.routes';
+import { productRouter } from './routes/product.routes';
 import { Config } from './config';
 
 export const createApp = (): Express => {
@@ -14,6 +15,7 @@ export const createApp = (): Express => {
   app.use(internalAuth.middleware());
   app.use(healthRouter);
   app.use(categoryRouter);
+  app.use(productRouter);
 
   return app;
 };
