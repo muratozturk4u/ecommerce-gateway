@@ -2,6 +2,15 @@
 
 Mimari kararlar ve önemli değişikliklerin kaydı.
 
+## [0.2.0] - 2026-03-28
+
+### Added
+- Auth Service: register, login, profile endpoint'leri
+- User model (email unique, bcrypt password hash)
+- JWT token uretimi (access token, 24h expiry)
+- Zod validation (register, login schema'lari)
+- Unit + integration testler (36 test, coverage >%99)
+
 ## [0.1.0] - 2026-03-24
 
 ### Added
