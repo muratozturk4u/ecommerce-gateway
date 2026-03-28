@@ -1,10 +1,12 @@
 import { CategoryService } from '../src/services/category.service';
 import { ICategoryRepository } from '../src/interfaces/category-repository.interface';
+import { IProductRepository } from '../src/interfaces/product-repository.interface';
 import { ICategoryDocument } from '../src/interfaces/category.interface';
 
 describe('CategoryService', () => {
   let categoryService: CategoryService;
   let mockRepo: jest.Mocked<ICategoryRepository>;
+  let mockProductRepo: jest.Mocked<IProductRepository>;
 
   const mockCategory = {
     id: '507f1f77bcf86cd799439011',
@@ -33,7 +35,16 @@ describe('CategoryService', () => {
       update: jest.fn(),
       delete: jest.fn()
     };
-    categoryService = new CategoryService(mockRepo);
+    mockProductRepo = {
+      findAll: jest.fn(),
+      findById: jest.fn(),
+      create: jest.fn(),
+      update: jest.fn(),
+      delete: jest.fn(),
+      updateStock: jest.fn(),
+      countByCategoryId: jest.fn()
+    };
+    categoryService = new CategoryService(mockRepo, mockProductRepo);
   });
 
   describe('getAll', () => {
@@ -204,6 +215,7 @@ describe('CategoryService', () => {
   describe('delete', () => {
     it('should delete category successfully', async () => {
       mockRepo.findById.mockResolvedValue(mockCategory);
+      mockProductRepo.countByCategoryId.mockResolvedValue(0);
       mockRepo.delete.mockResolvedValue(mockCategory);
 
       await expect(categoryService.delete('507f1f77bcf86cd799439011')).resolves.toBeUndefined();
@@ -225,6 +237,17 @@ describe('CategoryService', () => {
         categoryService.delete('invalid-id')
       ).rejects.toEqual(
         expect.objectContaining({ status: 400, code: 'VALIDATION_ERROR' })
+      );
+    });
+
+    it('should throw 409 when category has associated products (RESTRICT)', async () => {
+      mockRepo.findById.mockResolvedValue(mockCategory);
+      mockProductRepo.countByCategoryId.mockResolvedValue(3);
+
+      await expect(
+        categoryService.delete('507f1f77bcf86cd799439011')
+      ).rejects.toEqual(
+        expect.objectContaining({ status: 409, code: 'CONFLICT' })
       );
     });
   });

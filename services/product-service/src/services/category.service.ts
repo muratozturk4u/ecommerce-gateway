@@ -1,10 +1,14 @@
 import mongoose from 'mongoose';
 import { ICategoryService } from '../interfaces/category-service.interface';
 import { ICategoryRepository } from '../interfaces/category-repository.interface';
+import { IProductRepository } from '../interfaces/product-repository.interface';
 import { ICategory, ICategoryDocument, CreateCategoryDto, UpdateCategoryDto } from '../interfaces/category.interface';
 
 export class CategoryService implements ICategoryService {
-  constructor(private readonly categoryRepository: ICategoryRepository) {}
+  constructor(
+    private readonly categoryRepository: ICategoryRepository,
+    private readonly productRepository: IProductRepository
+  ) {}
 
   async getAll(): Promise<ICategory[]> {
     const categories = await this.categoryRepository.findAll();
@@ -54,6 +58,15 @@ export class CategoryService implements ICategoryService {
     const existing = await this.categoryRepository.findById(id);
     if (!existing) {
       throw { status: 404, code: 'NOT_FOUND', message: 'Category not found' };
+    }
+
+    const productCount = await this.productRepository.countByCategoryId(id);
+    if (productCount > 0) {
+      throw {
+        status: 409,
+        code: 'CONFLICT',
+        message: `Cannot delete category with ${productCount} associated product(s)`
+      };
     }
 
     await this.categoryRepository.delete(id);
