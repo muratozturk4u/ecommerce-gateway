@@ -2,6 +2,16 @@
 
 Mimari kararlar ve önemli değişikliklerin kaydı.
 
+## [0.4.0] - 2026-03-28
+
+### Added
+- Product CRUD endpoint'leri (GET, POST, PUT, DELETE)
+- Product arama (text search), filtreleme (category, price), siralama
+- Pagination (meta: page, limit, total, totalPages)
+- Stok guncelleme (PATCH /products/:id/stock — atomic $inc)
+- Category DELETE RESTRICT (urune bagli kategori silinemez)
+- Unit + integration testler (148 test, coverage >%99)
+
 ## [0.3.0] - 2026-03-28
 
 ### Added
