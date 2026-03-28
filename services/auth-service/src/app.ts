@@ -14,7 +14,7 @@ export const createApp = (): Express => {
   app.use(internalAuth.middleware());
 
   app.use(healthRouter);
-  app.use('/api', authRouter);
+  app.use(authRouter);
 
   return app;
 };
