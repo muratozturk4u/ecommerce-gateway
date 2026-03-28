@@ -8,6 +8,7 @@ const config: Config = {
   moduleFileExtensions: ['ts', 'js', 'json'],
   clearMocks: true,
   passWithNoTests: true,
+  setupFilesAfterEnv: ['<rootDir>/__tests__/setup.ts'],
   collectCoverageFrom: ['src/**/*.ts', '!src/server.ts', '!src/config/index.ts'],
   coverageDirectory: 'coverage',
   coverageThreshold: {
