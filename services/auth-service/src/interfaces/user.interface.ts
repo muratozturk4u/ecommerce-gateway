@@ -1,13 +1,27 @@
 import { Document } from 'mongoose';
 
-export interface IUser extends Document {
+export interface IUser {
+  id: string;
   email: string;
-  password: string;
+  passwordHash: string;
+  name: string;
   role: 'admin' | 'customer';
   createdAt: Date;
+  updatedAt: Date;
 }
 
-export interface IUserPayload {
-  userId: string;
+export interface IUserDocument extends Document {
+  email: string;
+  passwordHash: string;
+  name: string;
+  role: 'admin' | 'customer';
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface CreateUserDto {
+  email: string;
+  passwordHash: string;
+  name: string;
   role: 'admin' | 'customer';
 }
