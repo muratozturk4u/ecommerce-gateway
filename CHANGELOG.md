@@ -2,6 +2,14 @@
 
 Mimari kararlar ve önemli değişikliklerin kaydı.
 
+## [0.6.0] - 2026-03-28
+
+### Added
+- Seed data scripti (3 user, 4 category, 14 product, 5 order)
+- Docker Compose seed profili (docker compose --profile seed up seed)
+- Deterministik ObjectId'ler ile referential integrity
+- Idempotent seed (tekrar calistirmada ayni sonuc)
+
 ## [0.5.0] - 2026-03-28
 
 ### Added

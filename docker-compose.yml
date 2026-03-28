@@ -123,6 +123,22 @@ services:
       - internal-network
     restart: unless-stopped
 
+  seed:
+    build:
+      context: ./scripts
+      dockerfile: Dockerfile.seed
+    container_name: ecommerce-seed
+    environment:
+      - MONGODB_URI=mongodb://mongodb:27017
+    networks:
+      - internal-network
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    profiles:
+      - seed
+    restart: "no"
+
   prometheus:
     image: prom/prometheus:latest
     container_name: ecommerce-prometheus
