@@ -1,17 +1,19 @@
-import { User } from '../models/user.model';
-import { IUser } from '../interfaces/user.interface';
+import { IUserRepository } from '../interfaces/user-repository.interface';
+import { IUserDocument, CreateUserDto } from '../interfaces/user.interface';
+import { Model } from 'mongoose';
 
-export class UserRepository {
-  async findByEmail(email: string): Promise<IUser | null> {
-    return User.findOne({ email });
+export class UserRepository implements IUserRepository {
+  constructor(private readonly userModel: Model<IUserDocument>) {}
+
+  async create(data: CreateUserDto): Promise<IUserDocument> {
+    return this.userModel.create(data);
   }
 
-  async findById(id: string): Promise<IUser | null> {
-    return User.findById(id);
+  async findByEmail(email: string): Promise<IUserDocument | null> {
+    return this.userModel.findOne({ email: email.toLowerCase() });
   }
 
-  async create(data: { email: string; password: string; role?: 'admin' | 'customer' }): Promise<IUser> {
-    const user = new User(data);
-    return user.save();
+  async findById(id: string): Promise<IUserDocument | null> {
+    return this.userModel.findById(id);
   }
 }
