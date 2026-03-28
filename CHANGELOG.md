@@ -2,6 +2,14 @@
 
 Mimari kararlar ve önemli değişikliklerin kaydı.
 
+## [0.3.0] - 2026-03-28
+
+### Added
+- Product Service: Category CRUD endpoint'leri (GET, POST, PUT, DELETE)
+- Category model (name unique, case-insensitive duplicate kontrolu)
+- Shared error handler utility (error-handler.ts)
+- Unit + integration testler (61 test, coverage >%98)
+
 ## [0.2.0] - 2026-03-28
 
 ### Added
