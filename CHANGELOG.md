@@ -2,6 +2,16 @@
 
 Mimari kararlar ve önemli değişikliklerin kaydı.
 
+## [0.5.0] - 2026-03-28
+
+### Added
+- Order Service: siparis olusturma, listeleme, detay, durum guncelleme
+- Status state machine (pending → confirmed → shipped → delivered, pending → cancelled)
+- Data scoping (kullanici sadece kendi siparislerini gorur, admin tum siparisler)
+- Fiyat dogrulama (totalAmount + item prices)
+- Snapshot prensibi (productName, unitPrice siparis aninda sabit)
+- Unit + integration testler (78 test, coverage >%95)
+
 ## [0.4.0] - 2026-03-28
 
 ### Added
