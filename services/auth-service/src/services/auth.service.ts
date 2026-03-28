@@ -1,59 +1,79 @@
 import bcrypt from 'bcrypt';
-import jwt from 'jsonwebtoken';
-import { UserRepository } from '../repositories/user.repository';
-import { IUser, IUserPayload } from '../interfaces/user.interface';
-import { Config } from '../config';
+import jwt, { SignOptions } from 'jsonwebtoken';
+import { IAuthService, RegisterDto, LoginDto, AuthResponse, UserProfile } from '../interfaces/auth-service.interface';
+import { IUserRepository } from '../interfaces/user-repository.interface';
 
-export class AuthService {
-  private readonly userRepository: UserRepository;
+export class AuthService implements IAuthService {
+  private readonly SALT_ROUNDS = 10;
 
-  constructor() {
-    this.userRepository = new UserRepository();
-  }
+  constructor(
+    private readonly userRepository: IUserRepository,
+    private readonly jwtSecret: string,
+    private readonly jwtExpiresIn: SignOptions['expiresIn']
+  ) {}
 
-  async register(email: string, password: string): Promise<{ user: IUser; token: string }> {
-    const existing = await this.userRepository.findByEmail(email);
+  async register(data: RegisterDto): Promise<AuthResponse> {
+    const existing = await this.userRepository.findByEmail(data.email);
     if (existing) {
-      throw new Error('EMAIL_ALREADY_EXISTS');
+      throw { status: 409, code: 'CONFLICT', message: 'Email already exists' };
     }
 
-    const hashedPassword = await bcrypt.hash(password, 10);
-    const user = await this.userRepository.create({ email, password: hashedPassword });
+    const passwordHash = await bcrypt.hash(data.password, this.SALT_ROUNDS);
 
-    const token = this.generateToken(user);
-    return { user, token };
+    const user = await this.userRepository.create({
+      email: data.email,
+      passwordHash,
+      name: data.name,
+      role: 'customer'
+    });
+
+    const token = this.generateToken(user.id, user.role);
+
+    return {
+      user: { id: user.id, email: user.email, name: user.name, role: user.role },
+      token
+    };
   }
 
-  async login(email: string, password: string): Promise<{ user: IUser; token: string }> {
-    const user = await this.userRepository.findByEmail(email);
+  async login(data: LoginDto): Promise<AuthResponse> {
+    const user = await this.userRepository.findByEmail(data.email);
     if (!user) {
-      throw new Error('INVALID_CREDENTIALS');
+      throw { status: 401, code: 'UNAUTHORIZED', message: 'Invalid credentials' };
     }
 
-    const isValid = await bcrypt.compare(password, user.password);
+    const isValid = await bcrypt.compare(data.password, user.passwordHash);
     if (!isValid) {
-      throw new Error('INVALID_CREDENTIALS');
+      throw { status: 401, code: 'UNAUTHORIZED', message: 'Invalid credentials' };
     }
 
-    const token = this.generateToken(user);
-    return { user, token };
+    const token = this.generateToken(user.id, user.role);
+
+    return {
+      user: { id: user.id, email: user.email, name: user.name, role: user.role },
+      token
+    };
   }
 
-  async getProfile(userId: string): Promise<IUser> {
+  async getProfile(userId: string): Promise<UserProfile> {
     const user = await this.userRepository.findById(userId);
     if (!user) {
-      throw new Error('USER_NOT_FOUND');
+      throw { status: 404, code: 'NOT_FOUND', message: 'User not found' };
     }
-    return user;
+
+    return {
+      id: user.id,
+      email: user.email,
+      name: user.name,
+      role: user.role,
+      createdAt: user.createdAt
+    };
   }
 
-  private generateToken(user: IUser): string {
-    const payload: IUserPayload = {
-      userId: (user._id as string).toString(),
-      role: user.role,
-    };
-    return jwt.sign(payload, Config.JWT_SECRET, {
-      expiresIn: Config.JWT_EXPIRES_IN,
-    });
+  private generateToken(userId: string, role: string): string {
+    return jwt.sign(
+      { userId, role },
+      this.jwtSecret,
+      { expiresIn: this.jwtExpiresIn }
+    );
   }
 }
