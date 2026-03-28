@@ -1,0 +1,13 @@
+{
+  "name": "@ecommerce/seed",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Seed data for development environment",
+  "scripts": {
+    "seed": "node seed.js"
+  },
+  "dependencies": {
+    "mongoose": "^8.9.0",
+    "bcrypt": "^5.1.0"
+  }
+}
