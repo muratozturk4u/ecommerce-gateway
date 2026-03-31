@@ -1,35 +1,43 @@
-import axios, { AxiosError } from 'axios';
-import { Request } from 'express';
-import { IProxyResponse, IProxyService } from '../interfaces/proxy-service.interface';
+import axios, { AxiosError, AxiosRequestConfig } from 'axios';
+import { Request, Response } from 'express';
+import { IProxyService } from '../interfaces/proxy-service.interface';
 import { IServiceConfig } from '../interfaces/service-config.interface';
 import { Config } from '../config';
-import { Response } from 'express';
 
 export class ProxyService implements IProxyService {
+  private readonly internalKey: string;
+
+  constructor(internalKey: string = Config.INTERNAL_KEY) {
+    this.internalKey = internalKey;
+  }
+
   public async forward(req: Request, res: Response, service: IServiceConfig): Promise<void> {
     try {
-      const targetUrl = `${service.url}${req.originalUrl}`;
-      const headers: Record<string, string> = {
-        'x-internal-key': Config.INTERNAL_KEY,
-        'content-type': req.headers['content-type'] || 'application/json'
-      };
-
-      if (req.headers.authorization) {
-        headers['authorization'] = req.headers.authorization;
-      }
-
-      const response: IProxyResponse = await axios.request({
-        method: req.method as string,
-        url: targetUrl,
-        data: req.body,
-        headers,
-        timeout: 30000
-      });
-
+      const config = this.buildRequestConfig(req, service);
+      const response = await axios.request(config);
       res.status(response.status).json(response.data);
     } catch (error: unknown) {
       this.handleProxyError(error, res);
     }
+  }
+
+  private buildRequestConfig(req: Request, service: IServiceConfig): AxiosRequestConfig {
+    const headers: Record<string, string> = {
+      'x-internal-key': this.internalKey,
+      'content-type': req.headers['content-type'] || 'application/json'
+    };
+
+    if (req.headers.authorization) {
+      headers['authorization'] = req.headers.authorization;
+    }
+
+    return {
+      method: req.method as string,
+      url: `${service.url}${req.originalUrl}`,
+      data: req.body,
+      headers,
+      timeout: 30000
+    };
   }
 
   private handleProxyError(error: unknown, res: Response): void {
