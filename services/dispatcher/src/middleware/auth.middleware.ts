@@ -20,20 +20,12 @@ export class AuthMiddleware implements IAuthMiddleware {
 
   public authenticate(): (req: Request, res: Response, next: NextFunction) => void {
     return (req: Request, res: Response, next: NextFunction): void => {
-      const authHeader = req.headers.authorization;
+      const token = this.extractToken(req);
 
-      if (!authHeader || !authHeader.startsWith('Bearer ')) {
-        res.status(401).json({
-          success: false,
-          error: {
-            code: 'UNAUTHORIZED',
-            message: 'Token required'
-          }
-        });
+      if (!token) {
+        this.sendUnauthorized(res, 'Token required');
         return;
       }
-
-      const token = authHeader.split(' ')[1];
 
       try {
         const decoded = jwt.verify(token, this.jwtSecret) as IJwtPayload;
@@ -41,14 +33,26 @@ export class AuthMiddleware implements IAuthMiddleware {
         req.role = decoded.role;
         next();
       } catch {
-        res.status(401).json({
-          success: false,
-          error: {
-            code: 'UNAUTHORIZED',
-            message: 'Invalid or expired token'
-          }
-        });
+        this.sendUnauthorized(res, 'Invalid or expired token');
       }
     };
+  }
+
+  private extractToken(req: Request): string | null {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return null;
+    }
+    return authHeader.split(' ')[1];
+  }
+
+  private sendUnauthorized(res: Response, message: string): void {
+    res.status(401).json({
+      success: false,
+      error: {
+        code: 'UNAUTHORIZED',
+        message
+      }
+    });
   }
 }
