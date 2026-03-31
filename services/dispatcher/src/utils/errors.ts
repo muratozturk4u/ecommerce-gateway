@@ -39,3 +39,9 @@ export class ProxyError extends AppError {
     super(message, 502, 'BAD_GATEWAY');
   }
 }
+
+export class InsufficientStockError extends AppError {
+  constructor(message: string) {
+    super(message, 400, 'INSUFFICIENT_STOCK');
+  }
+}

@@ -31,13 +31,28 @@ export class ProxyService implements IProxyService {
       headers['authorization'] = req.headers.authorization;
     }
 
+    if (req.userId) {
+      headers['x-user-id'] = req.userId;
+    }
+
+    if (req.role) {
+      headers['x-user-role'] = req.role;
+    }
+
     return {
       method: req.method as string,
-      url: `${service.url}${req.originalUrl}`,
+      url: `${service.url}${this.stripApiPrefix(req.originalUrl)}`,
       data: req.body,
       headers,
       timeout: 30000
     };
+  }
+
+  private stripApiPrefix(url: string): string {
+    if (url.startsWith('/api')) {
+      return url.substring(4) || '/';
+    }
+    return url;
   }
 
   private handleProxyError(error: unknown, res: Response): void {

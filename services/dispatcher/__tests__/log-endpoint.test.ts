@@ -102,6 +102,26 @@ describe('Log Endpoint (GET /api/logs)', () => {
         expect.any(Number)
       );
     });
+
+    it('should filter by date range', async () => {
+      const startDate = '2026-03-01T00:00:00Z';
+      const endDate = '2026-03-31T23:59:59Z';
+
+      await request(app).get(
+        `/api/logs?startDate=${encodeURIComponent(startDate)}&endDate=${encodeURIComponent(endDate)}`
+      );
+
+      expect(mockLogRepository.findAll).toHaveBeenCalledWith(
+        expect.objectContaining({
+          timestamp: {
+            $gte: new Date(startDate),
+            $lte: new Date(endDate)
+          }
+        }),
+        expect.any(Number),
+        expect.any(Number)
+      );
+    });
   });
 
   describe('Non-admin access', () => {
