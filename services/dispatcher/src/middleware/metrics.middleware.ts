@@ -3,6 +3,7 @@ import { Counter, Histogram, Gauge, register } from 'prom-client';
 
 export interface IMetricsMiddleware {
   collect(): (req: Request, res: Response, next: NextFunction) => void;
+  getRegister(): typeof register;
 }
 
 export class MetricsMiddleware implements IMetricsMiddleware {

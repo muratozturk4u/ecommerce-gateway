@@ -65,5 +65,17 @@ describe('Prometheus Metrics', () => {
       const response = await request(app).get('/api/metrics');
       expect(response.text).toContain('http_request_duration_seconds');
     });
+
+    it('should track http_requests_by_service counter', async () => {
+      await request(app).get('/test');
+
+      const response = await request(app).get('/api/metrics');
+      expect(response.text).toContain('http_requests_by_service');
+    });
+
+    it('should track active_connections gauge', async () => {
+      const response = await request(app).get('/api/metrics');
+      expect(response.text).toContain('active_connections');
+    });
   });
 });

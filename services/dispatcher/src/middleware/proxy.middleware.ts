@@ -1,12 +1,18 @@
 import { Request, Response, NextFunction } from 'express';
+import { IProxyService } from '../interfaces/proxy-service.interface';
+import { IServiceRegistry } from '../interfaces/service-config.interface';
 import { ProxyService } from '../services/proxy.service';
 import { ServiceRegistry } from '../services/service-registry';
 
-export class ProxyMiddleware {
-  private readonly proxyService: ProxyService;
-  private readonly serviceRegistry: ServiceRegistry;
+export interface IProxyMiddleware {
+  forward(): (req: Request, res: Response, next: NextFunction) => void;
+}
 
-  constructor(proxyService?: ProxyService, serviceRegistry?: ServiceRegistry) {
+export class ProxyMiddleware implements IProxyMiddleware {
+  private readonly proxyService: IProxyService;
+  private readonly serviceRegistry: IServiceRegistry;
+
+  constructor(proxyService?: IProxyService, serviceRegistry?: IServiceRegistry) {
     this.proxyService = proxyService || new ProxyService();
     this.serviceRegistry = serviceRegistry || new ServiceRegistry();
   }
