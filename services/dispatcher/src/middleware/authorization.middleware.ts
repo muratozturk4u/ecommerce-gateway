@@ -16,35 +16,18 @@ export class AuthorizationMiddleware implements IAuthorizationMiddleware {
     return (req: Request, res: Response, next: NextFunction): void => {
       const rule = this.findMatchingRule(req.path, req.method);
 
-      if (!rule) {
+      if (!rule || rule.isPublic) {
         next();
         return;
       }
 
-      if (rule.isPublic) {
-        next();
+      if (!this.isAuthenticated(req)) {
+        this.sendError(res, 401, 'UNAUTHORIZED', 'Authentication required');
         return;
       }
 
-      if (!req.userId || !req.role) {
-        res.status(401).json({
-          success: false,
-          error: {
-            code: 'UNAUTHORIZED',
-            message: 'Authentication required'
-          }
-        });
-        return;
-      }
-
-      if (!rule.roles.includes(req.role)) {
-        res.status(403).json({
-          success: false,
-          error: {
-            code: 'FORBIDDEN',
-            message: 'Insufficient permissions'
-          }
-        });
+      if (!this.hasPermission(req.role!, rule.roles)) {
+        this.sendError(res, 403, 'FORBIDDEN', 'Insufficient permissions');
         return;
       }
 
@@ -52,11 +35,17 @@ export class AuthorizationMiddleware implements IAuthorizationMiddleware {
     };
   }
 
+  private isAuthenticated(req: Request): boolean {
+    return !!req.userId && !!req.role;
+  }
+
+  private hasPermission(userRole: string, allowedRoles: string[]): boolean {
+    return allowedRoles.includes(userRole);
+  }
+
   private findMatchingRule(path: string, method: string): IRouteAccessRule | undefined {
     return this.rules.find((rule) => {
-      const pathMatch = this.matchPath(rule.path, path);
-      const methodMatch = rule.method === method.toUpperCase();
-      return pathMatch && methodMatch;
+      return this.matchPath(rule.path, path) && rule.method === method.toUpperCase();
     });
   }
 
@@ -68,11 +57,15 @@ export class AuthorizationMiddleware implements IAuthorizationMiddleware {
       return false;
     }
 
-    return ruleSegments.every((segment, index) => {
-      if (segment.startsWith(':')) {
-        return true;
-      }
-      return segment === requestSegments[index];
+    return ruleSegments.every((segment, index) =>
+      segment.startsWith(':') || segment === requestSegments[index]
+    );
+  }
+
+  private sendError(res: Response, status: number, code: string, message: string): void {
+    res.status(status).json({
+      success: false,
+      error: { code, message }
     });
   }
 }
