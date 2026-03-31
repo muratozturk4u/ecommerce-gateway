@@ -1,11 +1,23 @@
 import { Request, Response } from 'express';
 import { LogRepository } from '../repositories/log.repository';
 
+interface ILogQuery {
+  page: number;
+  limit: number;
+  targetService?: string;
+  statusCode?: number;
+  startDate?: string;
+  endDate?: string;
+}
+
 export interface ILogController {
   getLogs(req: Request, res: Response): Promise<void>;
 }
 
 export class LogController implements ILogController {
+  private static readonly DEFAULT_PAGE = 1;
+  private static readonly DEFAULT_LIMIT = 20;
+
   private readonly logRepository: LogRepository;
 
   constructor(logRepository?: LogRepository) {
@@ -13,23 +25,16 @@ export class LogController implements ILogController {
   }
 
   public async getLogs(req: Request, res: Response): Promise<void> {
-    if (req.role !== 'admin') {
-      res.status(403).json({
-        success: false,
-        error: {
-          code: 'FORBIDDEN',
-          message: 'Admin access required'
-        }
-      });
+    if (!this.isAdmin(req)) {
+      this.sendForbidden(res);
       return;
     }
 
-    const page = parseInt(req.query.page as string) || 1;
-    const limit = parseInt(req.query.limit as string) || 20;
-    const filter = this.buildFilter(req);
+    const query = this.parseQuery(req);
+    const filter = this.buildFilter(query);
 
     const [logs, total] = await Promise.all([
-      this.logRepository.findAll(filter, page, limit),
+      this.logRepository.findAll(filter, query.page, query.limit),
       this.logRepository.count(filter)
     ]);
 
@@ -39,29 +44,54 @@ export class LogController implements ILogController {
         logs,
         pagination: {
           total,
-          page,
-          limit,
-          totalPages: Math.ceil(total / limit)
+          page: query.page,
+          limit: query.limit,
+          totalPages: Math.ceil(total / query.limit)
         }
       }
     });
   }
 
-  private buildFilter(req: Request): Record<string, unknown> {
+  private isAdmin(req: Request): boolean {
+    return req.role === 'admin';
+  }
+
+  private sendForbidden(res: Response): void {
+    res.status(403).json({
+      success: false,
+      error: {
+        code: 'FORBIDDEN',
+        message: 'Admin access required'
+      }
+    });
+  }
+
+  private parseQuery(req: Request): ILogQuery {
+    return {
+      page: parseInt(req.query.page as string) || LogController.DEFAULT_PAGE,
+      limit: parseInt(req.query.limit as string) || LogController.DEFAULT_LIMIT,
+      targetService: req.query.targetService as string | undefined,
+      statusCode: req.query.statusCode ? parseInt(req.query.statusCode as string) : undefined,
+      startDate: req.query.startDate as string | undefined,
+      endDate: req.query.endDate as string | undefined
+    };
+  }
+
+  private buildFilter(query: ILogQuery): Record<string, unknown> {
     const filter: Record<string, unknown> = {};
 
-    if (req.query.targetService) {
-      filter.targetService = req.query.targetService;
+    if (query.targetService) {
+      filter.targetService = query.targetService;
     }
 
-    if (req.query.statusCode) {
-      filter.statusCode = parseInt(req.query.statusCode as string);
+    if (query.statusCode) {
+      filter.statusCode = query.statusCode;
     }
 
-    if (req.query.startDate && req.query.endDate) {
+    if (query.startDate && query.endDate) {
       filter.timestamp = {
-        $gte: new Date(req.query.startDate as string),
-        $lte: new Date(req.query.endDate as string)
+        $gte: new Date(query.startDate),
+        $lte: new Date(query.endDate)
       };
     }
 
