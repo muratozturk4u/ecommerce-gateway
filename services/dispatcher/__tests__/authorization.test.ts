@@ -43,14 +43,22 @@ describe('Authorization Middleware', () => {
 
   describe('Protected routes', () => {
     it('should allow access when user has required role', async () => {
-      const response = await request(app)
-        .get('/api/orders')
-        .set('x-user-role', 'customer')
-        .set('x-user-id', 'user-123');
+      const testApp = express();
+      testApp.use(express.json());
+      testApp.use((req, _res, next) => {
+        req.userId = 'user-123';
+        req.role = 'customer';
+        next();
+      });
+      const authzMiddleware = new AuthorizationMiddleware(mockRules);
+      testApp.use(authzMiddleware.authorize());
+      testApp.all('*', (_req, res) => {
+        res.json({ success: true });
+      });
 
-      // Middleware reads req.role from previous auth middleware
-      // We simulate by setting req.role before authorization
+      const response = await request(testApp).get('/api/orders');
       expect(response.status).toBe(200);
+      expect(response.body.success).toBe(true);
     });
 
     it('should return 403 when user role is not authorized', async () => {
