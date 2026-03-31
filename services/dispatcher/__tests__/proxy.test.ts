@@ -1,13 +1,22 @@
 import request from 'supertest';
+import express from 'express';
 import axios from 'axios';
-import { createApp } from '../src/app';
+import { ProxyMiddleware } from '../src/middleware/proxy.middleware';
 
 jest.mock('axios');
 const mockedAxios = axios as jest.Mocked<typeof axios>;
 
 describe('Proxy Middleware', () => {
+  let app: express.Express;
+
   beforeEach(() => {
     jest.clearAllMocks();
+
+    app = express();
+    app.use(express.json());
+
+    const proxyMiddleware = new ProxyMiddleware();
+    app.use(proxyMiddleware.forward());
   });
 
   describe('GET request forwarding', () => {
@@ -18,7 +27,6 @@ describe('Proxy Middleware', () => {
         headers: { 'content-type': 'application/json' }
       });
 
-      const app = createApp();
       const response = await request(app)
         .get('/api/auth/profile')
         .set('Authorization', 'Bearer test-token');
@@ -35,7 +43,6 @@ describe('Proxy Middleware', () => {
         headers: { 'content-type': 'application/json' }
       });
 
-      const app = createApp();
       const response = await request(app).get('/api/products');
 
       expect(response.status).toBe(200);
@@ -52,7 +59,6 @@ describe('Proxy Middleware', () => {
         headers: { 'content-type': 'application/json' }
       });
 
-      const app = createApp();
       const response = await request(app)
         .post('/api/auth/login')
         .send(loginBody);
@@ -75,7 +81,6 @@ describe('Proxy Middleware', () => {
         headers: {}
       });
 
-      const app = createApp();
       await request(app).get('/api/orders');
 
       expect(mockedAxios.request).toHaveBeenCalledWith(
@@ -95,7 +100,6 @@ describe('Proxy Middleware', () => {
         message: 'connect ECONNREFUSED'
       });
 
-      const app = createApp();
       const response = await request(app).get('/api/auth/profile');
 
       expect(response.status).toBe(502);
@@ -104,7 +108,6 @@ describe('Proxy Middleware', () => {
     });
 
     it('should return 404 for unknown service routes', async () => {
-      const app = createApp();
       const response = await request(app).get('/api/unknown/path');
 
       expect(response.status).toBe(404);
@@ -120,7 +123,6 @@ describe('Proxy Middleware', () => {
         }
       });
 
-      const app = createApp();
       const response = await request(app).get('/api/auth/profile');
 
       expect(response.status).toBe(400);

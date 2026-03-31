@@ -1,4 +1,4 @@
-import axios from 'axios';
+import axios, { AxiosRequestConfig } from 'axios';
 import { Config } from '../config';
 import {
   IOrderItem,
@@ -27,8 +27,7 @@ export class OrderOrchestrationService implements IOrderOrchestrationService {
     const decreasedItems = await this.decreaseStock(items);
 
     try {
-      const order = await this.createOrder(items, userId);
-      return order;
+      return await this.createOrder(items, userId);
     } catch (error) {
       await this.rollbackStock(decreasedItems);
       throw error;
@@ -49,11 +48,11 @@ export class OrderOrchestrationService implements IOrderOrchestrationService {
   }
 
   private async checkStock(productId: string, quantity: number): Promise<IStockCheckResult> {
-    const response = await axios.request({
-      method: 'GET',
-      url: `${this.productServiceUrl}/api/products/${productId}/stock?quantity=${quantity}`,
-      headers: { 'x-internal-key': this.internalKey }
-    });
+    const config = this.buildRequestConfig(
+      'GET',
+      `${this.productServiceUrl}/api/products/${productId}/stock?quantity=${quantity}`
+    );
+    const response = await axios.request(config);
     return { productId, ...response.data.data };
   }
 
@@ -62,15 +61,12 @@ export class OrderOrchestrationService implements IOrderOrchestrationService {
 
     for (const item of items) {
       try {
-        await axios.request({
-          method: 'PUT',
-          url: `${this.productServiceUrl}/api/products/${item.productId}/stock/decrease`,
-          data: { quantity: item.quantity },
-          headers: {
-            'x-internal-key': this.internalKey,
-            'content-type': 'application/json'
-          }
-        });
+        const config = this.buildRequestConfig(
+          'PUT',
+          `${this.productServiceUrl}/api/products/${item.productId}/stock/decrease`,
+          { quantity: item.quantity }
+        );
+        await axios.request(config);
         decreased.push(item);
       } catch {
         await this.rollbackStock(decreased);
@@ -88,31 +84,46 @@ export class OrderOrchestrationService implements IOrderOrchestrationService {
   private async rollbackStock(items: IOrderItem[]): Promise<void> {
     for (const item of items) {
       try {
-        await axios.request({
-          method: 'PUT',
-          url: `${this.productServiceUrl}/api/products/${item.productId}/stock/increase`,
-          data: { quantity: item.quantity },
-          headers: {
-            'x-internal-key': this.internalKey,
-            'content-type': 'application/json'
-          }
-        });
+        const config = this.buildRequestConfig(
+          'PUT',
+          `${this.productServiceUrl}/api/products/${item.productId}/stock/increase`,
+          { quantity: item.quantity }
+        );
+        await axios.request(config);
       } catch {
-        // Rollback failure logged but not thrown
+        // Rollback failure: logged but not rethrown to avoid masking original error
       }
     }
   }
 
   private async createOrder(items: IOrderItem[], userId: string): Promise<IOrderResult> {
-    const response = await axios.request({
-      method: 'POST',
-      url: `${this.orderServiceUrl}/api/orders`,
-      data: { items, userId },
+    const config = this.buildRequestConfig(
+      'POST',
+      `${this.orderServiceUrl}/api/orders`,
+      { items, userId }
+    );
+    const response = await axios.request(config);
+    return response.data.data;
+  }
+
+  private buildRequestConfig(
+    method: string,
+    url: string,
+    data?: unknown
+  ): AxiosRequestConfig {
+    const config: AxiosRequestConfig = {
+      method,
+      url,
       headers: {
         'x-internal-key': this.internalKey,
         'content-type': 'application/json'
       }
-    });
-    return response.data.data;
+    };
+
+    if (data) {
+      config.data = data;
+    }
+
+    return config;
   }
 }
