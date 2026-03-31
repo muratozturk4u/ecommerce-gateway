@@ -3,11 +3,17 @@ import { IHealthController, IHealthResponse } from '../interfaces/health.interfa
 import { Config } from '../config';
 
 export class HealthController implements IHealthController {
+  private readonly serviceName: string;
+
+  constructor(serviceName: string = Config.SERVICE_NAME) {
+    this.serviceName = serviceName;
+  }
+
   public getHealth(): IHealthResponse {
     return {
       success: true,
       data: {
-        service: Config.SERVICE_NAME,
+        service: this.serviceName,
         status: 'ok',
         timestamp: new Date().toISOString()
       }
