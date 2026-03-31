@@ -4,8 +4,12 @@ import { Config } from '../config';
 export class ServiceRegistry implements IServiceRegistry {
   private readonly services: IServiceConfig[];
 
-  constructor() {
-    this.services = [
+  constructor(services?: IServiceConfig[]) {
+    this.services = services || this.getDefaultServices();
+  }
+
+  private getDefaultServices(): IServiceConfig[] {
+    return [
       {
         name: 'auth-service',
         url: Config.AUTH_SERVICE_URL,
@@ -26,13 +30,17 @@ export class ServiceRegistry implements IServiceRegistry {
 
   public resolve(path: string): IServiceConfig | null {
     for (const service of this.services) {
-      for (const prefix of service.pathPrefixes) {
-        if (path === prefix || path.startsWith(prefix + '/')) {
-          return service;
-        }
+      if (this.matchesService(path, service)) {
+        return service;
       }
     }
     return null;
+  }
+
+  private matchesService(path: string, service: IServiceConfig): boolean {
+    return service.pathPrefixes.some(
+      (prefix) => path === prefix || path.startsWith(prefix + '/')
+    );
   }
 
   public getAllServices(): IServiceConfig[] {
