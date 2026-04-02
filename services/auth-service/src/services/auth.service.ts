@@ -2,6 +2,7 @@ import bcrypt from 'bcrypt';
 import jwt, { SignOptions } from 'jsonwebtoken';
 import { IAuthService, RegisterDto, LoginDto, AuthResponse, UserProfile } from '../interfaces/auth-service.interface';
 import { IUserRepository } from '../interfaces/user-repository.interface';
+import { ConflictError, AuthenticationError, NotFoundError } from '../utils/errors';
 
 export class AuthService implements IAuthService {
   private readonly SALT_ROUNDS = 10;
@@ -15,7 +16,7 @@ export class AuthService implements IAuthService {
   async register(data: RegisterDto): Promise<AuthResponse> {
     const existing = await this.userRepository.findByEmail(data.email);
     if (existing) {
-      throw { status: 409, code: 'CONFLICT', message: 'Email already exists' };
+      throw new ConflictError('Email already exists');
     }
 
     const passwordHash = await bcrypt.hash(data.password, this.SALT_ROUNDS);
@@ -38,12 +39,12 @@ export class AuthService implements IAuthService {
   async login(data: LoginDto): Promise<AuthResponse> {
     const user = await this.userRepository.findByEmail(data.email);
     if (!user) {
-      throw { status: 401, code: 'UNAUTHORIZED', message: 'Invalid credentials' };
+      throw new AuthenticationError('Invalid credentials');
     }
 
     const isValid = await bcrypt.compare(data.password, user.passwordHash);
     if (!isValid) {
-      throw { status: 401, code: 'UNAUTHORIZED', message: 'Invalid credentials' };
+      throw new AuthenticationError('Invalid credentials');
     }
 
     const token = this.generateToken(user.id, user.role);
@@ -57,7 +58,7 @@ export class AuthService implements IAuthService {
   async getProfile(userId: string): Promise<UserProfile> {
     const user = await this.userRepository.findById(userId);
     if (!user) {
-      throw { status: 404, code: 'NOT_FOUND', message: 'User not found' };
+      throw new NotFoundError('User not found');
     }
 
     return {

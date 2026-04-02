@@ -77,7 +77,7 @@ describe('AuthService', () => {
           name: 'Test User'
         })
       ).rejects.toEqual(
-        expect.objectContaining({ status: 409, code: 'CONFLICT' })
+        expect.objectContaining({ statusCode: 409, code: 'CONFLICT' })
       );
     });
   });
@@ -114,7 +114,7 @@ describe('AuthService', () => {
       await expect(
         authService.login({ email: 'test@test.com', password: 'wrongpassword' })
       ).rejects.toEqual(
-        expect.objectContaining({ status: 401, code: 'UNAUTHORIZED' })
+        expect.objectContaining({ statusCode: 401, code: 'UNAUTHORIZED' })
       );
     });
 
@@ -124,7 +124,7 @@ describe('AuthService', () => {
       await expect(
         authService.login({ email: 'noone@test.com', password: 'password123' })
       ).rejects.toEqual(
-        expect.objectContaining({ status: 401, code: 'UNAUTHORIZED' })
+        expect.objectContaining({ statusCode: 401, code: 'UNAUTHORIZED' })
       );
     });
   });
@@ -151,7 +151,7 @@ describe('AuthService', () => {
       await expect(
         authService.getProfile('507f1f77bcf86cd799439011')
       ).rejects.toEqual(
-        expect.objectContaining({ status: 404, code: 'NOT_FOUND' })
+        expect.objectContaining({ statusCode: 404, code: 'NOT_FOUND' })
       );
     });
   });

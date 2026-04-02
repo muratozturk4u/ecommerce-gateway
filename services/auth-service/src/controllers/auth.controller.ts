@@ -4,6 +4,7 @@ import mongoose from 'mongoose';
 import { IAuthController } from '../interfaces/auth-controller.interface';
 import { IAuthService } from '../interfaces/auth-service.interface';
 import { registerSchema, loginSchema } from '../validators/auth.validator';
+import { AppError } from '../utils/errors';
 
 export class AuthController implements IAuthController {
   constructor(private readonly authService: IAuthService) {}
@@ -78,11 +79,10 @@ export class AuthController implements IAuthController {
       return;
     }
 
-    if (typeof error === 'object' && error !== null && 'status' in error) {
-      const err = error as { status: number; code: string; message: string };
-      res.status(err.status).json({
+    if (error instanceof AppError) {
+      res.status(error.statusCode).json({
         success: false,
-        error: { code: err.code, message: err.message }
+        error: { code: error.code, message: error.message }
       });
       return;
     }
