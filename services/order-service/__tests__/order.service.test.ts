@@ -107,7 +107,7 @@ describe('OrderService', () => {
       };
 
       await expect(service.create(dto)).rejects.toEqual(
-        expect.objectContaining({ status: 400, code: 'TOTAL_AMOUNT_MISMATCH' })
+        expect.objectContaining({ statusCode: 400, code: 'TOTAL_AMOUNT_MISMATCH' })
       );
       expect(repository.create).not.toHaveBeenCalled();
     });
@@ -121,7 +121,7 @@ describe('OrderService', () => {
       };
 
       await expect(service.create(dto)).rejects.toEqual(
-        expect.objectContaining({ status: 400, code: 'ITEM_PRICE_MISMATCH' })
+        expect.objectContaining({ statusCode: 400, code: 'ITEM_PRICE_MISMATCH' })
       );
       expect(repository.create).not.toHaveBeenCalled();
     });
@@ -175,7 +175,7 @@ describe('OrderService', () => {
       repository.findById.mockResolvedValue(null);
 
       await expect(service.getById(mockOrder.id, USER_ID, 'customer')).rejects.toEqual(
-        expect.objectContaining({ status: 404, code: 'NOT_FOUND' })
+        expect.objectContaining({ statusCode: 404, code: 'NOT_FOUND' })
       );
     });
 
@@ -183,13 +183,13 @@ describe('OrderService', () => {
       repository.findById.mockResolvedValue(mockOrder);
 
       await expect(service.getById(mockOrder.id, OTHER_USER_ID, 'customer')).rejects.toEqual(
-        expect.objectContaining({ status: 404, code: 'NOT_FOUND' })
+        expect.objectContaining({ statusCode: 404, code: 'NOT_FOUND' })
       );
     });
 
     it('should throw 400 when orderId is invalid ObjectId', async () => {
       await expect(service.getById('invalid-id', USER_ID, 'customer')).rejects.toEqual(
-        expect.objectContaining({ status: 400, code: 'VALIDATION_ERROR' })
+        expect.objectContaining({ statusCode: 400, code: 'VALIDATION_ERROR' })
       );
       expect(repository.findById).not.toHaveBeenCalled();
     });
@@ -311,7 +311,7 @@ describe('OrderService', () => {
       await expect(
         service.updateStatus(mockOrder.id, 'cancelled', USER_ID, 'customer')
       ).rejects.toEqual(
-        expect.objectContaining({ status: 403, code: 'FORBIDDEN' })
+        expect.objectContaining({ statusCode: 403, code: 'FORBIDDEN' })
       );
     });
 
@@ -322,7 +322,7 @@ describe('OrderService', () => {
       await expect(
         service.updateStatus(mockOrder.id, 'confirmed', USER_ID, 'customer')
       ).rejects.toEqual(
-        expect.objectContaining({ status: 403, code: 'FORBIDDEN' })
+        expect.objectContaining({ statusCode: 403, code: 'FORBIDDEN' })
       );
     });
 
@@ -332,7 +332,7 @@ describe('OrderService', () => {
       await expect(
         service.updateStatus(mockOrder.id, 'cancelled', OTHER_USER_ID, 'customer')
       ).rejects.toEqual(
-        expect.objectContaining({ status: 403, code: 'FORBIDDEN' })
+        expect.objectContaining({ statusCode: 403, code: 'FORBIDDEN' })
       );
     });
 
@@ -343,7 +343,7 @@ describe('OrderService', () => {
       await expect(
         service.updateStatus(mockOrder.id, 'confirmed', USER_ID, 'admin')
       ).rejects.toEqual(
-        expect.objectContaining({ status: 400, code: 'INVALID_STATUS_TRANSITION' })
+        expect.objectContaining({ statusCode: 400, code: 'INVALID_STATUS_TRANSITION' })
       );
     });
 
@@ -354,7 +354,7 @@ describe('OrderService', () => {
       await expect(
         service.updateStatus(mockOrder.id, 'confirmed', USER_ID, 'admin')
       ).rejects.toEqual(
-        expect.objectContaining({ status: 400, code: 'INVALID_STATUS_TRANSITION' })
+        expect.objectContaining({ statusCode: 400, code: 'INVALID_STATUS_TRANSITION' })
       );
     });
 
@@ -365,7 +365,7 @@ describe('OrderService', () => {
       await expect(
         service.updateStatus(mockOrder.id, 'pending', USER_ID, 'admin')
       ).rejects.toEqual(
-        expect.objectContaining({ status: 400, code: 'INVALID_STATUS_TRANSITION' })
+        expect.objectContaining({ statusCode: 400, code: 'INVALID_STATUS_TRANSITION' })
       );
     });
 
@@ -376,7 +376,7 @@ describe('OrderService', () => {
       await expect(
         service.updateStatus(mockOrder.id, 'shipped', USER_ID, 'admin')
       ).rejects.toEqual(
-        expect.objectContaining({ status: 400, code: 'INVALID_STATUS_TRANSITION' })
+        expect.objectContaining({ statusCode: 400, code: 'INVALID_STATUS_TRANSITION' })
       );
     });
 
@@ -387,7 +387,7 @@ describe('OrderService', () => {
       await expect(
         service.updateStatus(mockOrder.id, 'pending', USER_ID, 'admin')
       ).rejects.toEqual(
-        expect.objectContaining({ status: 400, code: 'INVALID_STATUS_TRANSITION' })
+        expect.objectContaining({ statusCode: 400, code: 'INVALID_STATUS_TRANSITION' })
       );
     });
 
@@ -397,7 +397,7 @@ describe('OrderService', () => {
       await expect(
         service.updateStatus(mockOrder.id, 'confirmed', USER_ID, 'admin')
       ).rejects.toEqual(
-        expect.objectContaining({ status: 404, code: 'NOT_FOUND' })
+        expect.objectContaining({ statusCode: 404, code: 'NOT_FOUND' })
       );
     });
 
@@ -409,7 +409,7 @@ describe('OrderService', () => {
       await expect(
         service.updateStatus(mockOrder.id, 'confirmed', USER_ID, 'admin')
       ).rejects.toEqual(
-        expect.objectContaining({ status: 400, code: 'INVALID_STATUS_TRANSITION' })
+        expect.objectContaining({ statusCode: 400, code: 'INVALID_STATUS_TRANSITION' })
       );
     });
   });

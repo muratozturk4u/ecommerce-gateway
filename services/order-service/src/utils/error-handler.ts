@@ -1,5 +1,6 @@
 import { Response } from 'express';
 import { ZodError } from 'zod';
+import { AppError } from './errors';
 
 export function handleError(res: Response, error: unknown): void {
   if (error instanceof ZodError) {
@@ -13,11 +14,10 @@ export function handleError(res: Response, error: unknown): void {
     return;
   }
 
-  if (typeof error === 'object' && error !== null && 'status' in error) {
-    const err = error as { status: number; code: string; message: string };
-    res.status(err.status).json({
+  if (error instanceof AppError) {
+    res.status(error.statusCode).json({
       success: false,
-      error: { code: err.code, message: err.message }
+      error: { code: error.code, message: error.message }
     });
     return;
   }

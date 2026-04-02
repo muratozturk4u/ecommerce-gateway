@@ -2,6 +2,7 @@ import mongoose from 'mongoose';
 import { IOrderService } from '../interfaces/order-service.interface';
 import { IOrderRepository } from '../interfaces/order-repository.interface';
 import { IOrder, IOrderItem, IOrderDocument, CreateOrderDto, OrderQuery, OrderStatus, PaginatedResult } from '../interfaces/order.interface';
+import { NotFoundError, AuthorizationError, InvalidStatusTransitionError, ItemPriceMismatchError, TotalAmountMismatchError, ValidationError } from '../utils/errors';
 
 const VALID_TRANSITIONS: Record<string, string[]> = {
   pending:   ['confirmed', 'cancelled'],
@@ -27,11 +28,11 @@ export class OrderService implements IOrderService {
 
     const order = await this.orderRepository.findById(orderId);
     if (!order) {
-      throw { status: 404, code: 'NOT_FOUND', message: 'Order not found' };
+      throw new NotFoundError('Order not found');
     }
 
     if (userRole !== 'admin' && order.userId !== userId) {
-      throw { status: 404, code: 'NOT_FOUND', message: 'Order not found' };
+      throw new NotFoundError('Order not found');
     }
 
     return this.toOrder(order);
@@ -62,34 +63,26 @@ export class OrderService implements IOrderService {
 
     const order = await this.orderRepository.findById(orderId);
     if (!order) {
-      throw { status: 404, code: 'NOT_FOUND', message: 'Order not found' };
+      throw new NotFoundError('Order not found');
     }
 
     if (userRole !== 'admin') {
       if (order.userId !== userId) {
-        throw { status: 403, code: 'FORBIDDEN', message: 'Access denied' };
+        throw new AuthorizationError('Access denied');
       }
       if (order.status !== 'pending' || newStatus !== 'cancelled') {
-        throw { status: 403, code: 'FORBIDDEN', message: 'Customers can only cancel pending orders' };
+        throw new AuthorizationError('Customers can only cancel pending orders');
       }
     }
 
     const validTargets = VALID_TRANSITIONS[order.status] || [];
     if (!validTargets.includes(newStatus)) {
-      throw {
-        status: 400,
-        code: 'INVALID_STATUS_TRANSITION',
-        message: `Cannot transition from ${order.status} to ${newStatus}`
-      };
+      throw new InvalidStatusTransitionError(`Cannot transition from ${order.status} to ${newStatus}`);
     }
 
     const updated = await this.orderRepository.updateStatus(orderId, order.status as OrderStatus, newStatus as OrderStatus);
     if (!updated) {
-      throw {
-        status: 400,
-        code: 'INVALID_STATUS_TRANSITION',
-        message: 'Status update failed — order status may have changed concurrently'
-      };
+      throw new InvalidStatusTransitionError('Status update failed — order status may have changed concurrently');
     }
 
     return this.toOrder(updated);
@@ -99,11 +92,7 @@ export class OrderService implements IOrderService {
     for (const item of items) {
       const expected = item.quantity * item.unitPrice;
       if (Math.abs(item.totalPrice - expected) > 0.01) {
-        throw {
-          status: 400,
-          code: 'ITEM_PRICE_MISMATCH',
-          message: `Item ${item.productName}: totalPrice (${item.totalPrice}) does not match quantity (${item.quantity}) * unitPrice (${item.unitPrice})`
-        };
+        throw new ItemPriceMismatchError(`Item ${item.productName}: totalPrice (${item.totalPrice}) does not match quantity (${item.quantity}) * unitPrice (${item.unitPrice})`);
       }
     }
   }
@@ -111,17 +100,13 @@ export class OrderService implements IOrderService {
   private validateTotalAmount(items: IOrderItem[], totalAmount: number): void {
     const calculated = items.reduce((sum, item) => sum + item.totalPrice, 0);
     if (Math.abs(totalAmount - calculated) > 0.01) {
-      throw {
-        status: 400,
-        code: 'TOTAL_AMOUNT_MISMATCH',
-        message: `totalAmount (${totalAmount}) does not match sum of item prices (${calculated})`
-      };
+      throw new TotalAmountMismatchError(`totalAmount (${totalAmount}) does not match sum of item prices (${calculated})`);
     }
   }
 
   private validateObjectId(id: string): void {
     if (!mongoose.Types.ObjectId.isValid(id)) {
-      throw { status: 400, code: 'VALIDATION_ERROR', message: 'Invalid order ID format' };
+      throw new ValidationError('Invalid order ID format');
     }
   }
 
