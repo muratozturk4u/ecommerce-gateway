@@ -128,7 +128,7 @@ describe('ProductService', () => {
       const query: ProductQuery = { ...defaultQuery, minPrice: 300, maxPrice: 100 };
 
       await expect(service.getAll(query)).rejects.toEqual(
-        expect.objectContaining({ status: 400, code: 'VALIDATION_ERROR' })
+        expect.objectContaining({ statusCode: 400, code: 'VALIDATION_ERROR' })
       );
       expect(mockProductRepository.findAll).not.toHaveBeenCalled();
     });
@@ -184,13 +184,13 @@ describe('ProductService', () => {
       mockProductRepository.findById.mockResolvedValue(null);
 
       await expect(service.getById('507f1f77bcf86cd799439011')).rejects.toEqual(
-        expect.objectContaining({ status: 404, code: 'NOT_FOUND' })
+        expect.objectContaining({ statusCode: 404, code: 'NOT_FOUND' })
       );
     });
 
     it('should throw 400 when id is invalid ObjectId', async () => {
       await expect(service.getById('invalid-id')).rejects.toEqual(
-        expect.objectContaining({ status: 400, code: 'VALIDATION_ERROR' })
+        expect.objectContaining({ statusCode: 400, code: 'VALIDATION_ERROR' })
       );
       expect(mockProductRepository.findById).not.toHaveBeenCalled();
     });
@@ -242,7 +242,7 @@ describe('ProductService', () => {
       mockCategoryRepository.findById.mockResolvedValue(null);
 
       await expect(service.create(createDto)).rejects.toEqual(
-        expect.objectContaining({ status: 400, code: 'VALIDATION_ERROR' })
+        expect.objectContaining({ statusCode: 400, code: 'VALIDATION_ERROR' })
       );
       expect(mockProductRepository.create).not.toHaveBeenCalled();
     });
@@ -271,7 +271,7 @@ describe('ProductService', () => {
       mockProductRepository.findById.mockResolvedValue(null);
 
       await expect(service.update('507f1f77bcf86cd799439011', updateDto)).rejects.toEqual(
-        expect.objectContaining({ status: 404, code: 'NOT_FOUND' })
+        expect.objectContaining({ statusCode: 404, code: 'NOT_FOUND' })
       );
       expect(mockProductRepository.update).not.toHaveBeenCalled();
     });
@@ -295,7 +295,7 @@ describe('ProductService', () => {
       mockCategoryRepository.findById.mockResolvedValue(null);
 
       await expect(service.update('507f1f77bcf86cd799439011', updateWithBadCategory)).rejects.toEqual(
-        expect.objectContaining({ status: 400, code: 'VALIDATION_ERROR' })
+        expect.objectContaining({ statusCode: 400, code: 'VALIDATION_ERROR' })
       );
       expect(mockProductRepository.update).not.toHaveBeenCalled();
     });
@@ -316,7 +316,7 @@ describe('ProductService', () => {
       mockProductRepository.findById.mockResolvedValue(null);
 
       await expect(service.delete('507f1f77bcf86cd799439011')).rejects.toEqual(
-        expect.objectContaining({ status: 404, code: 'NOT_FOUND' })
+        expect.objectContaining({ statusCode: 404, code: 'NOT_FOUND' })
       );
       expect(mockProductRepository.delete).not.toHaveBeenCalled();
     });
@@ -360,7 +360,7 @@ describe('ProductService', () => {
       mockProductRepository.findById.mockResolvedValue(mockProduct);
 
       await expect(service.updateStock('507f1f77bcf86cd799439011', -51)).rejects.toEqual(
-        expect.objectContaining({ status: 400, code: 'INSUFFICIENT_STOCK' })
+        expect.objectContaining({ statusCode: 400, code: 'INSUFFICIENT_STOCK' })
       );
       expect(mockProductRepository.updateStock).not.toHaveBeenCalled();
     });
@@ -369,7 +369,7 @@ describe('ProductService', () => {
       mockProductRepository.findById.mockResolvedValue(null);
 
       await expect(service.updateStock('507f1f77bcf86cd799439011', 10)).rejects.toEqual(
-        expect.objectContaining({ status: 404, code: 'NOT_FOUND' })
+        expect.objectContaining({ statusCode: 404, code: 'NOT_FOUND' })
       );
       expect(mockProductRepository.updateStock).not.toHaveBeenCalled();
     });
@@ -379,7 +379,7 @@ describe('ProductService', () => {
       mockProductRepository.updateStock.mockResolvedValue(null);
 
       await expect(service.updateStock('507f1f77bcf86cd799439011', -10)).rejects.toEqual(
-        expect.objectContaining({ status: 400, code: 'INSUFFICIENT_STOCK' })
+        expect.objectContaining({ statusCode: 400, code: 'INSUFFICIENT_STOCK' })
       );
     });
   });

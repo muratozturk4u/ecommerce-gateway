@@ -3,6 +3,7 @@ import { ICategoryService } from '../interfaces/category-service.interface';
 import { ICategoryRepository } from '../interfaces/category-repository.interface';
 import { IProductRepository } from '../interfaces/product-repository.interface';
 import { ICategory, ICategoryDocument, CreateCategoryDto, UpdateCategoryDto } from '../interfaces/category.interface';
+import { ValidationError, NotFoundError, ConflictError } from '../utils/errors';
 
 export class CategoryService implements ICategoryService {
   constructor(
@@ -19,7 +20,7 @@ export class CategoryService implements ICategoryService {
     this.validateObjectId(id);
     const category = await this.categoryRepository.findById(id);
     if (!category) {
-      throw { status: 404, code: 'NOT_FOUND', message: 'Category not found' };
+      throw new NotFoundError('Category not found');
     }
     return this.toCategory(category);
   }
@@ -27,7 +28,7 @@ export class CategoryService implements ICategoryService {
   async create(data: CreateCategoryDto): Promise<ICategory> {
     const existing = await this.categoryRepository.findByName(data.name);
     if (existing) {
-      throw { status: 409, code: 'CONFLICT', message: 'Category name already exists' };
+      throw new ConflictError('Category name already exists');
     }
     const category = await this.categoryRepository.create(data);
     return this.toCategory(category);
@@ -38,13 +39,13 @@ export class CategoryService implements ICategoryService {
 
     const existing = await this.categoryRepository.findById(id);
     if (!existing) {
-      throw { status: 404, code: 'NOT_FOUND', message: 'Category not found' };
+      throw new NotFoundError('Category not found');
     }
 
     if (data.name) {
       const duplicate = await this.categoryRepository.findByName(data.name);
       if (duplicate && duplicate.id !== id) {
-        throw { status: 409, code: 'CONFLICT', message: 'Category name already exists' };
+        throw new ConflictError('Category name already exists');
       }
     }
 
@@ -57,16 +58,12 @@ export class CategoryService implements ICategoryService {
 
     const existing = await this.categoryRepository.findById(id);
     if (!existing) {
-      throw { status: 404, code: 'NOT_FOUND', message: 'Category not found' };
+      throw new NotFoundError('Category not found');
     }
 
     const productCount = await this.productRepository.countByCategoryId(id);
     if (productCount > 0) {
-      throw {
-        status: 409,
-        code: 'CONFLICT',
-        message: `Cannot delete category with ${productCount} associated product(s)`
-      };
+      throw new ConflictError(`Cannot delete category with ${productCount} associated product(s)`);
     }
 
     await this.categoryRepository.delete(id);
@@ -74,7 +71,7 @@ export class CategoryService implements ICategoryService {
 
   private validateObjectId(id: string): void {
     if (!mongoose.Types.ObjectId.isValid(id)) {
-      throw { status: 400, code: 'VALIDATION_ERROR', message: 'Invalid category ID format' };
+      throw new ValidationError('Invalid category ID format');
     }
   }
 

@@ -84,7 +84,7 @@ describe('CategoryService', () => {
       await expect(
         categoryService.getById('507f1f77bcf86cd799439011')
       ).rejects.toEqual(
-        expect.objectContaining({ status: 404, code: 'NOT_FOUND' })
+        expect.objectContaining({ statusCode: 404, code: 'NOT_FOUND' })
       );
     });
 
@@ -92,7 +92,7 @@ describe('CategoryService', () => {
       await expect(
         categoryService.getById('invalid-id')
       ).rejects.toEqual(
-        expect.objectContaining({ status: 400, code: 'VALIDATION_ERROR' })
+        expect.objectContaining({ statusCode: 400, code: 'VALIDATION_ERROR' })
       );
     });
   });
@@ -114,7 +114,7 @@ describe('CategoryService', () => {
       await expect(
         categoryService.create({ name: 'Elektronik' })
       ).rejects.toEqual(
-        expect.objectContaining({ status: 409, code: 'CONFLICT' })
+        expect.objectContaining({ statusCode: 409, code: 'CONFLICT' })
       );
     });
 
@@ -124,7 +124,7 @@ describe('CategoryService', () => {
       await expect(
         categoryService.create({ name: 'elektronik' })
       ).rejects.toEqual(
-        expect.objectContaining({ status: 409, code: 'CONFLICT' })
+        expect.objectContaining({ statusCode: 409, code: 'CONFLICT' })
       );
     });
 
@@ -156,7 +156,7 @@ describe('CategoryService', () => {
       await expect(
         categoryService.update('507f1f77bcf86cd799439011', { name: 'Updated' })
       ).rejects.toEqual(
-        expect.objectContaining({ status: 404, code: 'NOT_FOUND' })
+        expect.objectContaining({ statusCode: 404, code: 'NOT_FOUND' })
       );
     });
 
@@ -164,7 +164,7 @@ describe('CategoryService', () => {
       await expect(
         categoryService.update('invalid-id', { name: 'Updated' })
       ).rejects.toEqual(
-        expect.objectContaining({ status: 400, code: 'VALIDATION_ERROR' })
+        expect.objectContaining({ statusCode: 400, code: 'VALIDATION_ERROR' })
       );
     });
 
@@ -175,7 +175,7 @@ describe('CategoryService', () => {
       await expect(
         categoryService.update('507f1f77bcf86cd799439011', { name: 'Giyim' })
       ).rejects.toEqual(
-        expect.objectContaining({ status: 409, code: 'CONFLICT' })
+        expect.objectContaining({ statusCode: 409, code: 'CONFLICT' })
       );
     });
 
@@ -207,7 +207,7 @@ describe('CategoryService', () => {
       await expect(
         categoryService.update('507f1f77bcf86cd799439011', { name: 'giyim' })
       ).rejects.toEqual(
-        expect.objectContaining({ status: 409, code: 'CONFLICT' })
+        expect.objectContaining({ statusCode: 409, code: 'CONFLICT' })
       );
     });
   });
@@ -228,7 +228,7 @@ describe('CategoryService', () => {
       await expect(
         categoryService.delete('507f1f77bcf86cd799439011')
       ).rejects.toEqual(
-        expect.objectContaining({ status: 404, code: 'NOT_FOUND' })
+        expect.objectContaining({ statusCode: 404, code: 'NOT_FOUND' })
       );
     });
 
@@ -236,7 +236,7 @@ describe('CategoryService', () => {
       await expect(
         categoryService.delete('invalid-id')
       ).rejects.toEqual(
-        expect.objectContaining({ status: 400, code: 'VALIDATION_ERROR' })
+        expect.objectContaining({ statusCode: 400, code: 'VALIDATION_ERROR' })
       );
     });
 
@@ -247,7 +247,7 @@ describe('CategoryService', () => {
       await expect(
         categoryService.delete('507f1f77bcf86cd799439011')
       ).rejects.toEqual(
-        expect.objectContaining({ status: 409, code: 'CONFLICT' })
+        expect.objectContaining({ statusCode: 409, code: 'CONFLICT' })
       );
     });
   });

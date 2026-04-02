@@ -3,6 +3,7 @@ import { IProductService } from '../interfaces/product-service.interface';
 import { IProductRepository } from '../interfaces/product-repository.interface';
 import { ICategoryRepository } from '../interfaces/category-repository.interface';
 import { IProduct, IProductDocument, CreateProductDto, UpdateProductDto, ProductQuery, PaginatedResult } from '../interfaces/product.interface';
+import { ValidationError, NotFoundError, InsufficientStockError } from '../utils/errors';
 
 export class ProductService implements IProductService {
   constructor(
@@ -12,7 +13,7 @@ export class ProductService implements IProductService {
 
   async getAll(query: ProductQuery): Promise<PaginatedResult<IProduct>> {
     if (query.minPrice !== undefined && query.maxPrice !== undefined && query.minPrice > query.maxPrice) {
-      throw { status: 400, code: 'VALIDATION_ERROR', message: 'minPrice cannot be greater than maxPrice' };
+      throw new ValidationError('minPrice cannot be greater than maxPrice');
     }
 
     if (query.categoryId) {
@@ -36,7 +37,7 @@ export class ProductService implements IProductService {
     this.validateObjectId(id, 'product');
     const product = await this.productRepository.findById(id);
     if (!product) {
-      throw { status: 404, code: 'NOT_FOUND', message: 'Product not found' };
+      throw new NotFoundError('Product not found');
     }
     return this.toProduct(product);
   }
@@ -46,7 +47,7 @@ export class ProductService implements IProductService {
       this.validateObjectId(data.categoryId, 'category');
       const category = await this.categoryRepository.findById(data.categoryId);
       if (!category) {
-        throw { status: 400, code: 'VALIDATION_ERROR', message: 'Category not found' };
+        throw new ValidationError('Category not found');
       }
     }
 
@@ -59,14 +60,14 @@ export class ProductService implements IProductService {
 
     const existing = await this.productRepository.findById(id);
     if (!existing) {
-      throw { status: 404, code: 'NOT_FOUND', message: 'Product not found' };
+      throw new NotFoundError('Product not found');
     }
 
     if (data.categoryId) {
       this.validateObjectId(data.categoryId, 'category');
       const category = await this.categoryRepository.findById(data.categoryId);
       if (!category) {
-        throw { status: 400, code: 'VALIDATION_ERROR', message: 'Category not found' };
+        throw new ValidationError('Category not found');
       }
     }
 
@@ -78,7 +79,7 @@ export class ProductService implements IProductService {
     this.validateObjectId(id, 'product');
     const existing = await this.productRepository.findById(id);
     if (!existing) {
-      throw { status: 404, code: 'NOT_FOUND', message: 'Product not found' };
+      throw new NotFoundError('Product not found');
     }
     await this.productRepository.delete(id);
   }
@@ -88,31 +89,23 @@ export class ProductService implements IProductService {
 
     const product = await this.productRepository.findById(id);
     if (!product) {
-      throw { status: 404, code: 'NOT_FOUND', message: 'Product not found' };
+      throw new NotFoundError('Product not found');
     }
 
     if (product.stock + quantity < 0) {
-      throw {
-        status: 400,
-        code: 'INSUFFICIENT_STOCK',
-        message: `Insufficient stock. Current: ${product.stock}, requested change: ${quantity}`
-      };
+      throw new InsufficientStockError(`Insufficient stock. Current: ${product.stock}, requested change: ${quantity}`);
     }
 
     const updated = await this.productRepository.updateStock(id, quantity);
     if (!updated) {
-      throw {
-        status: 400,
-        code: 'INSUFFICIENT_STOCK',
-        message: 'Stock update failed due to concurrent modification'
-      };
+      throw new InsufficientStockError('Stock update failed due to concurrent modification');
     }
     return this.toProduct(updated);
   }
 
   private validateObjectId(id: string, entity: string): void {
     if (!mongoose.Types.ObjectId.isValid(id)) {
-      throw { status: 400, code: 'VALIDATION_ERROR', message: `Invalid ${entity} ID format` };
+      throw new ValidationError(`Invalid ${entity} ID format`);
     }
   }
 
