@@ -35,6 +35,7 @@ export const DEFAULT_ROUTE_RULES: IRouteAccessRule[] = [
   { path: '/api/products', method: 'POST', authLevel: 'admin', description: 'Create product' },
   { path: '/api/products/:id', method: 'PUT', authLevel: 'admin', description: 'Update product' },
   { path: '/api/products/:id', method: 'DELETE', authLevel: 'admin', description: 'Delete product' },
+  { path: '/api/products/:id/stock', method: 'PATCH', authLevel: 'admin', description: 'Update product stock' },
   { path: '/api/categories', method: 'GET', authLevel: 'protected', description: 'List categories' },
   { path: '/api/categories/:id', method: 'GET', authLevel: 'protected', description: 'Get category by ID' },
   { path: '/api/categories', method: 'POST', authLevel: 'admin', description: 'Create category' },
