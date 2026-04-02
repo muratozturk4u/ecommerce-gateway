@@ -38,11 +38,11 @@ CLAUDE.md
 SCRATCHPAD.md
 
 # Internal Planning Documentation
-docs/transformation/
-docs/adr/
-docs/architecture/
 docs/INDEX.md
 docs/*.pdf
+docs/is-bolumu-plani.md
+docs/tahsin-gorevleri.md
+docs/tdd-test-talimat*
 
 # Load Test Results
 load-tests/results/
