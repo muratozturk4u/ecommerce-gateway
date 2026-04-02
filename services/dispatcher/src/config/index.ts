@@ -31,4 +31,6 @@ export class Config {
   static readonly AUTH_SERVICE_URL: string = process.env.AUTH_SERVICE_URL || 'http://localhost:3001';
   static readonly PRODUCT_SERVICE_URL: string = process.env.PRODUCT_SERVICE_URL || 'http://localhost:3002';
   static readonly ORDER_SERVICE_URL: string = process.env.ORDER_SERVICE_URL || 'http://localhost:3003';
+  static readonly RATE_LIMIT_WINDOW_MS: number = parseInt(process.env.RATE_LIMIT_WINDOW_MS || String(15 * 60 * 1000), 10);
+  static readonly RATE_LIMIT_MAX: number = parseInt(process.env.RATE_LIMIT_MAX || '100', 10);
 }

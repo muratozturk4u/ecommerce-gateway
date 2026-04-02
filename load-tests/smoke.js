@@ -121,7 +121,7 @@ export default function () {
       { headers: getHeaders(customerToken) }
     );
     check(res, {
-      'order status 201': (r) => r.status === 201,
+      'order status 201 or 400 (stock)': (r) => r.status === 201 || r.status === 400,
     });
   });
 

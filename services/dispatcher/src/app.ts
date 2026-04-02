@@ -8,6 +8,7 @@ import { AuthMiddleware } from './middleware/auth.middleware';
 import { AuthorizationMiddleware } from './middleware/authorization.middleware';
 import { LoggingMiddleware } from './middleware/logging.middleware';
 import { ErrorHandler } from './middleware/error-handler.middleware';
+import { Config } from './config';
 import { ProxyMiddleware } from './middleware/proxy.middleware';
 import { ProxyService } from './services/proxy.service';
 import { ServiceRegistry } from './services/service-registry';
@@ -29,7 +30,10 @@ export const createApp = (): Express => {
   const logQueryService = new LogQueryService(logRepository);
 
   // Middleware instances
-  const rateLimiter = new RateLimitMiddleware();
+  const rateLimiter = new RateLimitMiddleware({
+    windowMs: Config.RATE_LIMIT_WINDOW_MS,
+    maxRequests: Config.RATE_LIMIT_MAX
+  });
   const metricsMiddleware = new MetricsMiddleware();
   const authMiddleware = new AuthMiddleware();
   const authzMiddleware = new AuthorizationMiddleware();

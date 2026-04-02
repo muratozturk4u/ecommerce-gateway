@@ -54,33 +54,24 @@ function randomItem(arr) {
   return arr[Math.floor(Math.random() * arr.length)];
 }
 
-// VU bazinda token cache
-let cachedToken = null;
-
-function getToken() {
-  if (cachedToken) return cachedToken;
-
+// Setup: tek seferlik login, tum VU'lar bu token'i kullanir
+export function setup() {
   const res = http.post(
     `${BASE_URL}/api/auth/login`,
     JSON.stringify({ email: CUSTOMER_EMAIL, password: CUSTOMER_PASSWORD }),
     { headers: getHeaders() }
   );
 
-  if (res.status === 200) {
-    const body = JSON.parse(res.body);
-    cachedToken = body.data?.token;
-    return cachedToken;
+  if (res.status !== 200) {
+    throw new Error(`Login failed: ${res.status} ${res.body}`);
   }
-  return null;
+
+  const body = JSON.parse(res.body);
+  return { token: body.data.token };
 }
 
-export default function () {
-  const token = getToken();
-  if (!token) {
-    sleep(1);
-    return;
-  }
-
+export default function (data) {
+  const token = data.token;
   const rand = Math.random() * 100;
 
   if (rand < 35) {

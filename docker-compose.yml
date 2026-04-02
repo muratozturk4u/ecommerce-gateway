@@ -17,6 +17,8 @@ services:
       - ORDER_SERVICE_URL=http://order-service:3003
       - LOG_LEVEL=${LOG_LEVEL:-info}
       - NODE_ENV=${NODE_ENV:-development}
+      - RATE_LIMIT_WINDOW_MS=${RATE_LIMIT_WINDOW_MS:-900000}
+      - RATE_LIMIT_MAX=${RATE_LIMIT_MAX:-500000}
     networks:
       - public-network
       - internal-network
