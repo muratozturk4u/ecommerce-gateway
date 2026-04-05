@@ -118,10 +118,27 @@ services:
     volumes:
       - grafana_data:/var/lib/grafana
       - ./monitoring/grafana/provisioning:/etc/grafana/provisioning
+      - ./monitoring/grafana/dashboards:/var/lib/grafana/dashboards
     networks:
       - public-network
       - internal-network
     restart: unless-stopped
+
+  seed:
+    build:
+      context: ./scripts
+      dockerfile: Dockerfile.seed
+    container_name: ecommerce-seed
+    environment:
+      - MONGODB_URI=mongodb://mongodb:27017
+    networks:
+      - internal-network
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    profiles:
+      - seed
+    restart: "no"
 
   prometheus:
     image: prom/prometheus:latest

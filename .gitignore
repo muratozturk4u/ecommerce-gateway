@@ -44,6 +44,9 @@ docs/architecture/
 docs/INDEX.md
 docs/*.pdf
 
+# Load Test Results
+load-tests/results/
+
 # Misc
 *.zip
 *.tgz
